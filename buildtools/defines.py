@@ -87,6 +87,29 @@ except KeyError:
 
 # Paths to Vagrantfiles of fortual machines for build
 VM_BUILD_PATH_LIST = [
-    'need_for_build/virtual/build_machines/xenial_64',
-    'need_for_build/virtual/build_machines/xenial_32',
+    u'need_for_build/virtual/build_machines/xenial_64',
+    u'need_for_build/virtual/build_machines/xenial_32',
 ]
+
+HOST_BUILD_LINUX_64 = '192.168.100.64'
+HOST_BUILD_LINUX_32 = '192.168.100.32'
+
+HOST_BUILD_PARAMS = {
+    'hosts': ['ubuntu@' + HOST_BUILD_LINUX_64,
+              'ubuntu@' + HOST_BUILD_LINUX_32,
+              ],
+
+    HOST_BUILD_LINUX_32: {
+        'suffix': u'_x86',
+        'vagrant_path': u'need_for_build/virtual/build_machines/xenial_32',
+        'home_dir': u'/home/ubuntu',
+        'outwiker_dir': u'/home/ubuntu/projects/outwiker',
+    },
+
+    HOST_BUILD_LINUX_64: {
+        'suffix': u'_x64',
+        'vagrant_path': u'need_for_build/virtual/build_machines/xenial_64',
+        'home_dir': u'/home/ubuntu',
+        'outwiker_dir': u'/home/ubuntu/projects/outwiker',
+    },
+}

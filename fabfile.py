@@ -10,7 +10,10 @@ import sys
 import urllib2
 import shutil
 
-from fabric.api import local, lcd, settings, task, cd, put, hosts
+from fabric.api import (local, lcd, settings, task, cd, put,
+                        hosts, env, roles)
+import fabric.api as api
+
 from buildtools.libs.colorama import Fore
 
 from buildtools.utilites import (getPython,
@@ -33,6 +36,7 @@ from buildtools.defines import (
     PPA_UNSTABLE_PATH,
     PPA_STABLE_PATH,
     VM_BUILD_PATH_LIST,
+    HOST_BUILD_PARAMS
 )
 from buildtools.versions import (getOutwikerVersion,
                                  downloadAppInfo,
@@ -81,7 +85,14 @@ except ImportError:
                                        DEPLOY_PLUGINS_PACK_PATH,
                                        )
 
-# env.hosts = [DEPLOY_SERVER_NAME]
+env.roledefs = {
+    'vm_build': HOST_BUILD_PARAMS['hosts']
+}
+
+env.key_filename = [
+    'need_for_build/virtual/build_machines/xenial_32/.vagrant/machines/default/virtualbox/private_key',
+    'need_for_build/virtual/build_machines/xenial_64/.vagrant/machines/default/virtualbox/private_key',
+]
 
 
 @task
@@ -662,10 +673,39 @@ def vm_stop():
 
 
 @task
+@roles('vm_build')
 def vm_prepare():
     '''
-    Prepare virtual machines for build,
+    Prepare virtual machines for build.
     '''
-    vm_run()
-    with lcd(u'need_for_build/virtual/build_machines'):
-        local(u'ansible-playbook prepare_build_machines.yml')
+    # vm_run()
+    # with lcd(u'need_for_build/virtual/build_machines'):
+    #     local(u'ansible-playbook prepare_build_machines.yml')
+
+    vagrant_path = HOST_BUILD_PARAMS[env.host]['vagrant_path']
+    with lcd(vagrant_path):
+        local('vagrant up')
+
+    soft = [
+        'mc',
+        'python-pip',
+        'git',
+        'vim-gtk3',
+        'fabric',
+        'python-wxgtk3.0',
+        'python-wxversion',
+        'libwxgtk-webview3.0-0v5',
+        'python-pil',
+        'python-enchant',
+        'python-appindicator',
+        'python-gtk2',
+        # 'python-wxgtk-webview3.0',
+        'ibus-gtk3',
+        'debhelper',
+        'devscripts',
+        'p7zip-full',
+    ]
+
+    api.run('sudo apt-get -y update')
+    api.run('sudo apt-get -y install ' + ' '.join(soft))
+    api.run('mkdir -p "{}"'.format(HOST_BUILD_PARAMS[env.host]['outwiker_dir']))

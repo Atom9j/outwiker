@@ -15,7 +15,7 @@
           - mc
           - python-pip
           - git
-          - konsole
+          # - konsole
           - vim-gtk3
           - fabric
           - python-wxgtk3.0
